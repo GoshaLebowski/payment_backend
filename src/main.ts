@@ -8,6 +8,7 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { getCorsConfig, getSwaggerConfig } from './config'
 import { SwaggerModule } from '@nestjs/swagger'
+import type { NestExpressApplication } from '@nestjs/platform-express'
 
 
 
@@ -50,10 +51,14 @@ import { SwaggerModule } from '@nestjs/swagger'
 
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule)
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        rawBody: true
+    })
 
     const config = app.get(ConfigService)
     const logger = new Logger(AppModule.name)
+
+    app.set('trust proxy', true)
 
     app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
 
