@@ -8,70 +8,8 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 
 
 import { InitPaymentRequest } from './dto/init-payment.dto';
+import { StripeService } from './providers/stripe/stripe.service';
 import { YoomoneyService } from './providers/yoomoney/yoomoney.service';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -122,7 +60,8 @@ import { YoomoneyService } from './providers/yoomoney/yoomoney.service';
 export class PaymentService {
     public constructor(
         private readonly prismaService: PrismaService,
-        private readonly yoomoneyService: YoomoneyService
+        private readonly yoomoneyService: YoomoneyService,
+        private readonly stripeService: StripeService
     ) {}
 
     public async getHistory(user: User) {
@@ -209,6 +148,15 @@ export class PaymentService {
                     transaction,
                     billingPeriod
                 )
+                break
+            case PaymentProvider.STRIPE:
+                payment = await this.stripeService.create(
+                    plan,
+                    transaction,
+                    user,
+                    billingPeriod
+                )
+                break
         }
 
         await this.prismaService.transaction.update({

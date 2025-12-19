@@ -1,4 +1,29 @@
-import type { Plan } from '@prisma/client'
+import type { Plan } from '@prisma/client';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
     {
@@ -13,7 +38,9 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
         ],
         isFeatured: false,
         monthlyPrice: 850,
-        yearlyPrice: 8160
+        yearlyPrice: 8160,
+        stripeMonthlyPriceId: 'price_1SfztXLnzYjnxdE4o9ZkjABX',
+        stripeYearlyPriceId: 'price_1SfztXLnzYjnxdE48mfJqWKN'
     },
     {
         title: 'Профессиональный',
@@ -27,7 +54,9 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
         ],
         isFeatured: true,
         monthlyPrice: 2499,
-        yearlyPrice: 23990
+        yearlyPrice: 23990,
+        stripeMonthlyPriceId: 'price_1Sg00mLnzYjnxdE4kKf61VIR',
+        stripeYearlyPriceId: 'price_1Sg00mLnzYjnxdE4JYMZ5frI'
     },
     {
         title: 'Бизнес',
@@ -42,6 +71,8 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
         ],
         isFeatured: false,
         monthlyPrice: 4999,
-        yearlyPrice: 47990
+        yearlyPrice: 47990,
+        stripeMonthlyPriceId: 'price_1SfzzQLnzYjnxdE4iVcKrN2N',
+        stripeYearlyPriceId: 'price_1SfzzQLnzYjnxdE4V75Z24g1'
     }
 ]

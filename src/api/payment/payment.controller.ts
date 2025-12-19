@@ -1,19 +1,30 @@
-import {
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Post
-} from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import type { User } from '@prisma/client'
+import { Body, Controller, Get, Post } from '@nestjs/common'
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { User } from '@prisma/client';
 
-import { Authorized, Protected } from '../../common/decorators'
 
-import { PaymentHistoryResponse } from './dto'
-import { InitPaymentRequest } from './dto/init-payment.dto'
-import { PaymentService } from './payment.service'
+
+import { Authorized, Protected } from '../../common/decorators';
+
+
+
+import { PaymentHistoryResponse } from './dto';
+import { InitPaymentRequest } from './dto/init-payment.dto';
+import { PaymentService } from './payment.service';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @ApiTags('Payment')
 @Controller('payment')
@@ -40,13 +51,5 @@ export class PaymentController {
         @Authorized() user: User
     ) {
         return await this.paymentService.init(dto, user)
-    }
-
-    @Post('webhook')
-    @HttpCode(HttpStatus.OK)
-    public async webhook(@Body() dto: any) {
-        console.log('PAYMENT WEBHOOK: ', dto)
-
-        return dto
     }
 }
