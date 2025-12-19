@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BillingPeriod, type Plan, type Transaction } from '@prisma/client';
+import { type Plan, type Transaction } from '@prisma/client';
 import { ConfirmationEnum, CurrencyEnum, PaymentMethodsEnum, YookassaService } from 'nestjs-yookassa';
 
 
@@ -14,19 +14,10 @@ import { ConfirmationEnum, CurrencyEnum, PaymentMethodsEnum, YookassaService } f
 export class YoomoneyService {
     public constructor(private readonly yookassaService: YookassaService) {}
 
-    public async create(
-        plan: Plan,
-        transaction: Transaction,
-        billingPeriod: BillingPeriod
-    ) {
-        const amount =
-            billingPeriod === BillingPeriod.MONTHLY
-                ? plan.monthlyPrice
-                : plan.yearlyPrice
-
+    public async create(plan: Plan, transaction: Transaction) {
         return this.yookassaService.payments.create({
             amount: {
-                value: amount,
+                value: transaction.amount,
                 currency: CurrencyEnum.RUB
             },
             description: `Оплата подписки на тарифный план "${plan.title}"`,

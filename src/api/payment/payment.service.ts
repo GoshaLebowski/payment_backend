@@ -8,8 +8,84 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 
 
 import { InitPaymentRequest } from './dto/init-payment.dto';
+import { CryptoService } from './providers/crypto/crypto.service';
 import { StripeService } from './providers/stripe/stripe.service';
 import { YoomoneyService } from './providers/yoomoney/yoomoney.service';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -61,7 +137,8 @@ export class PaymentService {
     public constructor(
         private readonly prismaService: PrismaService,
         private readonly yoomoneyService: YoomoneyService,
-        private readonly stripeService: StripeService
+        private readonly stripeService: StripeService,
+        private readonly cryptoService: CryptoService
     ) {}
 
     public async getHistory(user: User) {
@@ -104,8 +181,8 @@ export class PaymentService {
 
         const amount =
             billingPeriod === BillingPeriod.MONTHLY
-                ? plan.yearlyPrice
-                : plan.monthlyPrice
+                ? plan.monthlyPrice
+                : plan.yearlyPrice
 
         const transaction = await this.prismaService.transaction.create({
             data: {
@@ -139,23 +216,21 @@ export class PaymentService {
             }
         })
 
-        let payment
+        let payment: any
 
         switch (provider) {
             case PaymentProvider.YOOKASSA:
-                payment = await this.yoomoneyService.create(
-                    plan,
-                    transaction,
-                    billingPeriod
-                )
+                payment = await this.yoomoneyService.create(plan, transaction)
                 break
             case PaymentProvider.STRIPE:
                 payment = await this.stripeService.create(
                     plan,
-                    transaction,
-                    user,
-                    billingPeriod
+                    billingPeriod,
+                    user
                 )
+                break
+            case PaymentProvider.CRYPTOPAY:
+                payment = await this.cryptoService.create(plan, transaction)
                 break
         }
 

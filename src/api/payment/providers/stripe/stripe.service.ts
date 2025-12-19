@@ -1,12 +1,34 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import {
-    BillingPeriod,
-    type Plan,
-    type Transaction,
-    type User
-} from '@prisma/client'
-import Stripe from 'stripe'
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { BillingPeriod, type Plan, User } from '@prisma/client';
+import Stripe from 'stripe';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @Injectable()
 export class StripeService {
@@ -27,12 +49,7 @@ export class StripeService {
         )
     }
 
-    public async create(
-        plan: Plan,
-        transaction: Transaction,
-        user: User,
-        billingPeriod: BillingPeriod
-    ) {
+    public async create(plan: Plan, billingPeriod: BillingPeriod, user: User) {
         const priceId =
             billingPeriod === BillingPeriod.MONTHLY
                 ? plan.stripeMonthlyPriceId
@@ -66,7 +83,7 @@ export class StripeService {
         signature: string
     ): Promise<Stripe.Event> {
         try {
-            return await this.stripe.webhooks.constructEvent(
+            return this.stripe.webhooks.constructEvent(
                 rawBody,
                 signature,
                 this.WEBHOOK_SECRET
