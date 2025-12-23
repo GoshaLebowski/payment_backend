@@ -60,78 +60,6 @@ import { YoomoneyService } from './providers/yoomoney/yoomoney.service';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @Injectable()
 export class PaymentService {
     public constructor(
@@ -225,6 +153,7 @@ export class PaymentService {
             case PaymentProvider.STRIPE:
                 payment = await this.stripeService.create(
                     plan,
+                    transaction,
                     billingPeriod,
                     user
                 )
