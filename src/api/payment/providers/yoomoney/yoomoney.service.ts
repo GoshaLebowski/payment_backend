@@ -1,7 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { type Plan, type Transaction } from '@prisma/client';
+import { type Plan, type Transaction, TransactionStatus } from '@prisma/client';
 import CIDR from 'ip-cidr';
 import { ConfirmationEnum, CurrencyEnum, PaymentMethodsEnum, YookassaService } from 'nestjs-yookassa';
+
+
+
+import type { PaymentWebhookResult } from '../../interfaces'
+import { YookassaWebhookDto } from '../../webhook/dto'
+
+
+
 
 
 
@@ -42,8 +50,42 @@ export class YoomoneyService {
                 type: ConfirmationEnum.REDIRECT,
                 return_url: 'http://localhost:3000/'
             },
-            save_payment_method: true
+            save_payment_method: true,
+            metadata: {
+                transactionId: transaction.id,
+                planId: plan.id
+            }
         })
+    }
+
+    public async handleWebhook(
+        dto: YookassaWebhookDto
+    ): Promise<PaymentWebhookResult> {
+        const transactionId = dto.object.metadata?.transactionId
+        const planId = dto.object.metadata?.planId
+        const paymentId = dto.object.id
+
+        let status: TransactionStatus = TransactionStatus.PENDING
+
+        switch (dto.event) {
+            case 'payment.waiting_for_capture':
+                await this.yookassaService.payments.capture(paymentId)
+                break
+            case 'payment.succeeded':
+                status = TransactionStatus.SUCCEEDED
+                break
+            case 'payment.canceled':
+                status = TransactionStatus.FAILED
+                break
+        }
+
+        return {
+            transactionId,
+            planId,
+            paymentId,
+            status,
+            raw: dto
+        }
     }
 
     public verifyWebhook(ip: string) {

@@ -1,21 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BillingPeriod, type Plan, User } from '@prisma/client';
+import { BillingPeriod, type Plan, Transaction, TransactionStatus, User } from '@prisma/client';
 import Stripe from 'stripe';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+import { PaymentWebhookResult } from '../../interfaces';
 
 
 
@@ -49,7 +39,12 @@ export class StripeService {
         )
     }
 
-    public async create(plan: Plan, billingPeriod: BillingPeriod, user: User) {
+    public async create(
+        plan: Plan,
+        transaction: Transaction,
+        billingPeriod: BillingPeriod,
+        user: User
+    ) {
         const priceId =
             billingPeriod === BillingPeriod.MONTHLY
                 ? plan.stripeMonthlyPriceId
@@ -74,8 +69,56 @@ export class StripeService {
             ],
             mode: 'subscription',
             success_url: successUrl,
-            cancel_url: cancelUrl
+            cancel_url: cancelUrl,
+            metadata: {
+                transactionId: transaction.id,
+                planId: plan.id
+            }
         })
+    }
+
+    public async handleWebhook(
+        event: Stripe.Event
+    ): Promise<PaymentWebhookResult | null> {
+        switch (event.type) {
+            case 'checkout.session.completed': {
+                const payment = event.data.object as Stripe.Checkout.Session
+
+                const transactionId = payment.metadata?.transactionId
+                const planId = payment.metadata?.planId
+                const paymentId = payment.id
+
+                if (!transactionId || !planId) return null
+
+                return {
+                    transactionId,
+                    planId,
+                    paymentId,
+                    status: TransactionStatus.SUCCEEDED,
+                    raw: event
+                }
+            }
+            case 'invoice.payment_failed': {
+                const invoice = event.data.object as Stripe.Invoice
+
+                const transactionId = invoice.metadata?.transactionId
+                const planId = invoice.metadata?.planId
+                const paymentId = invoice.id
+
+                if (!transactionId || !planId || !paymentId) return null
+
+                return {
+                    transactionId,
+                    planId,
+                    paymentId,
+                    status: TransactionStatus.FAILED,
+                    raw: event
+                }
+            }
+
+            default:
+                return null
+        }
     }
 
     public async parseEvent(
