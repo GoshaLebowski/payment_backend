@@ -8,7 +8,7 @@ export function getMailerConfig(configService: ConfigService): MailerOptions {
             port: configService.getOrThrow<string>('MAIL_PORT'),
             auth: {
                 user: configService.getOrThrow<string>('MAIL_LOGIN'),
-                password: configService.getOrThrow<string>('MAIL_PASSWORD'),
+                pass: configService.getOrThrow<string>('MAIL_PASSWORD'),
             }
         },
         defaults: {

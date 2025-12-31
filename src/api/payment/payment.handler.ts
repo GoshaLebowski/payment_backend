@@ -1,19 +1,81 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
-import {
-    BillingPeriod,
-    SubscriptionStatus,
-    TransactionStatus
-} from '@prisma/client'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BillingPeriod, SubscriptionStatus, TransactionStatus } from '@prisma/client';
 
-import { PrismaService } from '../../infra/prisma/prisma.service'
 
-import { PaymentWebhookResult } from './interfaces'
+
+import { PrismaService } from '../../infra/prisma/prisma.service';
+import { MailService } from '../../libs/mail/mail.service';
+
+
+
+import { PaymentWebhookResult } from './interfaces';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @Injectable()
 export class PaymentHandler {
     private readonly logger = new Logger(PaymentHandler.name)
 
-    public constructor(private readonly prismaService: PrismaService) {}
+    public constructor(
+        private readonly prismaService: PrismaService,
+        private readonly mailService: MailService
+    ) {}
 
     public async processResult(result: PaymentWebhookResult) {
         const { transactionId, planId, paymentId, status, raw } = result
@@ -93,6 +155,11 @@ export class PaymentHandler {
                 }
             })
 
+            await this.mailService.sendPaymentSuccessEmail(
+                subscription.user,
+                transaction
+            )
+
             this.logger.log(`Payment succeeded: ${subscription.user.email}`)
         } else if (status === TransactionStatus.FAILED) {
             await this.prismaService.userSubscription.update({
@@ -103,6 +170,11 @@ export class PaymentHandler {
                     status: SubscriptionStatus.EXPIRED
                 }
             })
+
+            await this.mailService.sendPaymentFailedEmail(
+                subscription.user,
+                transaction
+            )
 
             this.logger.error(`Payment failed: ${subscription.user.email}`)
         }

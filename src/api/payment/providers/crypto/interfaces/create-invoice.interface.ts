@@ -10,7 +10,7 @@ export enum Currency {
 }
 
 export enum PaidButtonName {
-    VIEW_ITEM = 'viteItem',
+    VIEW_ITEM = 'viewItem',
     OPEN_CHANNEL = 'openChannel',
     OPEN_BOT = 'openBot',
     CALLBACK = 'callback'
